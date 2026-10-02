@@ -11,6 +11,8 @@ namespace IslandAssault
         float retarget;
         float recoil;
         float idlePhase;
+        Transform cachedTurret;
+        Vector3 turretBasePos;
 
         public void Init(Building b)
         {
@@ -26,11 +28,13 @@ namespace IslandAssault
             var turret = building.model.turret;
             float dt = Time.deltaTime;
 
-            // recoil kick
+            if (turret != cachedTurret) { cachedTurret = turret; turretBasePos = turret.localPosition; recoil = 0f; }
+
+            // recoil kick (backwards along the barrel)
             if (recoil > 0f)
             {
                 recoil = Mathf.Max(0f, recoil - dt * 4f);
-                turret.localPosition = new Vector3(turret.localPosition.x, turret.localPosition.y, -recoil * 0.25f);
+                turret.localPosition = turretBasePos - turret.localRotation * Vector3.forward * (recoil * 0.25f);
             }
 
             var am = AttackMode.I;

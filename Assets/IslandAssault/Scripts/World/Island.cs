@@ -223,6 +223,16 @@ namespace IslandAssault
                 float s = EdgeDistance(x, z);
                 if (s < 1f || s > 12f || InsideGridArea(x, z, 1f)) { i--; tries++; if (tries > 4000) break; continue; }
                 float sc = Rand(rnd, 0.6f, 2.2f);
+                var rockModel = ModelLibrary.Find("Rock");
+                if (rockModel != null)
+                {
+                    var rp = Art.Pivot(root, "Rock", new Vector3(x, HeightAt(x, z) - 0.15f, z));
+                    rp.localRotation = Quaternion.Euler(0, Rand(rnd, 0, 360), 0);
+                    float rh;
+                    ModelLibrary.Spawn(rockModel, rp, sc * 1.4f, 0f, out rh);
+                    decorations.Add(rp);
+                    continue;
+                }
                 var mesh = Art.MakeIco(rnd.Next(), 0.35f);
                 var rock = Art.MeshPart(root, mesh, new Vector3(x, HeightAt(x, z) + sc * 0.15f, z),
                     new Vector3(sc * Rand(rnd, 0.9f, 1.6f), sc * Rand(rnd, 0.6f, 1.0f), sc * Rand(rnd, 0.9f, 1.5f)),
@@ -266,6 +276,14 @@ namespace IslandAssault
         {
             var root = Art.Pivot(parent, "Palm", pos);
             root.localRotation = Quaternion.Euler(0, Rand(rnd, 0, 360), 0);
+            var palmModel = ModelLibrary.Find("Palm");
+            if (palmModel != null)
+            {
+                float ph;
+                ModelLibrary.Spawn(palmModel, root, 0f, Rand(rnd, 4.5f, 6.5f), out ph);
+                root.gameObject.AddComponent<Sway>().amount = 1.2f;
+                return root;
+            }
             float lean = Rand(rnd, 5f, 22f);
             int segs = 5;
             float segH = Rand(rnd, 0.75f, 0.95f);

@@ -19,7 +19,7 @@ namespace IslandAssault
         int followedFlare = -1;
         float walkT;
         float scale = 1f;
-        Transform body, legL, legR, gun, muzzle;
+        Transform body, legL, legR, gun, muzzle, modelRoot;
         WorldUI.Bar bar;
         Vector3 flareOffset;
 
@@ -46,6 +46,16 @@ namespace IslandAssault
         {
             scale = type == TroopType.Heavy ? 1.35f : (type == TroopType.Rocketeer ? 1.05f : 1f);
             var root = Art.Pivot(transform, "Model", Vector3.zero);
+            modelRoot = root;
+            var custom = ModelLibrary.Find(type.ToString());
+            if (custom != null)
+            {
+                float h;
+                ModelLibrary.Spawn(custom, root, 0f, 1.6f * scale, out h);
+                muzzle = ModelLibrary.FindChild(root, "muzzle");
+                if (muzzle == null) muzzle = Art.Pivot(root, "Muzzle", new Vector3(0.2f, h * 0.55f, 0.5f));
+                return;
+            }
             root.localScale = Vector3.one * scale;
             Color uniform = new Color(0.30f, 0.42f, 0.28f);
             Color skin = new Color(0.96f, 0.78f, 0.62f);
@@ -207,7 +217,23 @@ namespace IslandAssault
 
         void Animate(bool walking)
         {
-            if (legL == null) return;
+            if (legL == null)
+            {
+                // custom model: simple hop while walking
+                if (modelRoot == null) return;
+                if (walking)
+                {
+                    walkT += Time.deltaTime * def.speed * 3.2f;
+                    modelRoot.localPosition = new Vector3(0, Mathf.Abs(Mathf.Sin(walkT)) * 0.12f, 0);
+                    modelRoot.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(walkT) * 4f);
+                }
+                else
+                {
+                    modelRoot.localPosition = Vector3.Lerp(modelRoot.localPosition, Vector3.zero, Time.deltaTime * 10f);
+                    modelRoot.localRotation = Quaternion.Slerp(modelRoot.localRotation, Quaternion.identity, Time.deltaTime * 10f);
+                }
+                return;
+            }
             if (walking)
             {
                 walkT += Time.deltaTime * def.speed * 3.2f;

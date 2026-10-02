@@ -37,6 +37,14 @@ namespace IslandAssault
         {
             var hullCol = new Color(0.42f, 0.5f, 0.46f);
             var m = Art.Pivot(transform, "Model", Vector3.zero);
+            var custom = ModelLibrary.Find("LandingBoat");
+            if (custom != null)
+            {
+                var sink = Art.Pivot(m, "Hull", new Vector3(0, -0.35f, 0));   // sit a little in the water
+                float h;
+                ModelLibrary.Spawn(custom, sink, 4.4f, 0f, out h);
+                return;
+            }
             Art.Box(m, new Vector3(0, 0.15f, 0), new Vector3(2.2f, 0.8f, 4.2f), hullCol);
             Art.Box(m, new Vector3(0, 0.58f, 0), new Vector3(2.3f, 0.1f, 4.3f), Art.Player);
             Art.Box(m, new Vector3(-1.05f, 0.75f, -0.2f), new Vector3(0.12f, 0.35f, 3.6f), hullCol);

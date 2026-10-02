@@ -367,6 +367,14 @@ namespace IslandAssault
             gunboat = new GameObject("Gunboat").transform;
             gunboat.position = new Vector3(-14f, 0f, -62f);
             gunboat.rotation = Quaternion.Euler(0, 75f, 0);
+            var customBoat = ModelLibrary.Find("Gunboat");
+            if (customBoat != null)
+            {
+                var sink = Art.Pivot(gunboat, "Hull", new Vector3(0, -0.6f, 0));
+                float gh;
+                ModelLibrary.Spawn(customBoat, sink, 14f, 0f, out gh);
+                return;
+            }
             var hull = new Color(0.38f, 0.45f, 0.52f);
             Art.Box(gunboat, new Vector3(0, 0.3f, 0), new Vector3(4.5f, 1.6f, 13f), hull);
             Art.MeshPart(gunboat, Art.Pyramid, new Vector3(0, 0.3f, 6.5f), new Vector3(4.5f, 3.5f, 1.6f), Art.Mat(hull), new Vector3(90, 0, 0));

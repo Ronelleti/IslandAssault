@@ -27,6 +27,15 @@ namespace IslandAssault
             // Ground pad
             Art.Box(root, new Vector3(0, 0.05f, 0), new Vector3(w - 0.25f, 0.1f, w - 0.25f), new Color(0.78f, 0.68f, 0.50f));
 
+            // A real 3D model dropped into Resources/IslandAssaultModels replaces the generated one
+            var custom = ModelLibrary.FindBuilding(type, level, enemy);
+            if (custom != null)
+            {
+                CustomModel(root, refs, custom, type, w, team);
+                LevelPips(root, level, w);
+                return refs;
+            }
+
             // the building itself is drawn 20% larger than its pad so it reads well from the camera
             const float BodyScale = 1.2f;
             var body = Art.Pivot(root, "Body", Vector3.zero);
@@ -45,6 +54,45 @@ namespace IslandAssault
             refs.height *= BodyScale;
             LevelPips(root, level, w);
             return refs;
+        }
+
+        static void CustomModel(Transform root, ModelRefs refs, GameObject prefab, BuildingType type, float w, Color team)
+        {
+            var def = GameData.Get(type);
+            var body = Art.Pivot(root, "Body", Vector3.zero);
+            float h;
+            var inst = ModelLibrary.Spawn(prefab, body, w * 0.92f, type == BuildingType.HQ ? 9f : 7f, out h);
+            refs.height = h;
+
+            if (def.isDefense)
+            {
+                // Find the part that should aim. Put it under a clean pivot so it rotates around the vertical axis.
+                var part = ModelLibrary.FindChild(inst, "turret", "weapon", "head", "barrel", "gun");
+                var pivot = new GameObject("Turret").transform;
+                pivot.SetParent(body, false);
+                if (part != null)
+                {
+                    pivot.position = new Vector3(body.position.x, part.position.y, body.position.z);
+                    part.SetParent(pivot, true);
+                }
+                else
+                {
+                    // no separate turret part: the whole model turns
+                    pivot.localPosition = Vector3.zero;
+                    inst.SetParent(pivot, true);
+                }
+                refs.turret = pivot;
+                var muzzle = ModelLibrary.FindChild(inst, "muzzle");
+                if (muzzle == null)
+                {
+                    float y = part != null ? 0.2f : h * 0.6f;
+                    muzzle = Art.Pivot(pivot, "Muzzle", new Vector3(0, y, w * 0.4f));
+                }
+                refs.muzzle = muzzle;
+            }
+
+            // small team flag so you can tell your buildings from the enemy's
+            Flag(root, new Vector3(w * 0.5f - 0.35f, 0.1f, w * 0.5f - 0.35f), Mathf.Clamp(h * 0.6f, 1.4f, 3f), team);
         }
 
         static void LevelPips(Transform root, int level, float w)

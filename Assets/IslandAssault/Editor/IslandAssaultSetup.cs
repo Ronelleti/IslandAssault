@@ -23,6 +23,17 @@ namespace IslandAssault.EditorTools
         [MenuItem("Island Assault/Prepare for Build")]
         static void EnsureMenu() { Ensure(true); }
 
+        [MenuItem("Island Assault/Show Custom Models Folder")]
+        static void ShowModelsFolder()
+        {
+            const string models = Dir + "/IslandAssaultModels";
+            if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/IslandAssault", "Resources");
+            if (!AssetDatabase.IsValidFolder(models)) AssetDatabase.CreateFolder(Dir, "IslandAssaultModels");
+            var folder = AssetDatabase.LoadAssetAtPath<Object>(models);
+            Selection.activeObject = folder;
+            EditorGUIUtility.PingObject(folder);
+        }
+
         static void Ensure(bool log)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
