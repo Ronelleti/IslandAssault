@@ -76,7 +76,7 @@ namespace IslandAssault
             Save.homeTick = now;
 
             BuildUI();
-            CameraController.I.Focus(new Vector3(0, 0, -6f), 60f);
+            CameraController.I.Focus(new Vector3(0, 0, -3f), 44f);
             CameraController.I.InputEnabled = true;
         }
 
@@ -328,6 +328,7 @@ namespace IslandAssault
             CancelPlacement();
             Deselect();
             placing = true;
+            island.ShowGrid(true);
             placeType = type;
             moving = move;
             buildPanel.gameObject.SetActive(false);
@@ -459,6 +460,7 @@ namespace IslandAssault
             ghost = null;
             footprint = null;
             placing = false;
+            if (island != null) island.ShowGrid(false);
             draggingGhost = false;
             if (CameraController.I != null) CameraController.I.PanBlocked = false;
             if (placeBar != null) placeBar.gameObject.SetActive(false);

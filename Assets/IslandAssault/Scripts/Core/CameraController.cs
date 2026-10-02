@@ -11,9 +11,9 @@ namespace IslandAssault
 
         public Camera cam;
         public Vector3 pivot = new Vector3(0, 0.8f, -4f);
-        public float distance = 58f;
-        public float minDistance = 22f;
-        public float maxDistance = 100f;
+        public float distance = 44f;
+        public float minDistance = 16f;
+        public float maxDistance = 85f;
         public float yaw = 0f;
         public float boundRadius = 42f;
 
@@ -41,12 +41,13 @@ namespace IslandAssault
             var cc = cam.gameObject.GetComponent<CameraController>();
             if (cc == null) cc = cam.gameObject.AddComponent<CameraController>();
             cc.cam = cam;
-            cam.fieldOfView = 34f;
+            cam.fieldOfView = 32f;
             cam.nearClipPlane = 0.5f;
             cam.farClipPlane = 600f;
             cam.clearFlags = CameraClearFlags.Skybox;
             cam.backgroundColor = new Color(0.55f, 0.78f, 0.95f);
             I = cc;
+            RenderQuality.Apply(cam);
             cc.targetDistance = cc.distance;
             return cc;
         }

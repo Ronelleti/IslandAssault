@@ -27,17 +27,22 @@ namespace IslandAssault
             // Ground pad
             Art.Box(root, new Vector3(0, 0.05f, 0), new Vector3(w - 0.25f, 0.1f, w - 0.25f), new Color(0.78f, 0.68f, 0.50f));
 
+            // the building itself is drawn 20% larger than its pad so it reads well from the camera
+            const float BodyScale = 1.2f;
+            var body = Art.Pivot(root, "Body", Vector3.zero);
+            body.localScale = Vector3.one * BodyScale;
             switch (type)
             {
-                case BuildingType.HQ: HQ(root, refs, level, team); break;
-                case BuildingType.GoldMine: GoldMine(root, refs, level, team); break;
-                case BuildingType.Sawmill: Sawmill(root, refs, level, team); break;
-                case BuildingType.Barracks: Barracks(root, refs, level, team); break;
-                case BuildingType.Cannon: Cannon(root, refs, level, team); break;
-                case BuildingType.MachineGun: MachineGun(root, refs, level, team); break;
-                case BuildingType.Sniper: Sniper(root, refs, level, team); break;
-                case BuildingType.Mortar: Mortar(root, refs, level, team); break;
+                case BuildingType.HQ: HQ(body, refs, level, team); break;
+                case BuildingType.GoldMine: GoldMine(body, refs, level, team); break;
+                case BuildingType.Sawmill: Sawmill(body, refs, level, team); break;
+                case BuildingType.Barracks: Barracks(body, refs, level, team); break;
+                case BuildingType.Cannon: Cannon(body, refs, level, team); break;
+                case BuildingType.MachineGun: MachineGun(body, refs, level, team); break;
+                case BuildingType.Sniper: Sniper(body, refs, level, team); break;
+                case BuildingType.Mortar: Mortar(body, refs, level, team); break;
             }
+            refs.height *= BodyScale;
             LevelPips(root, level, w);
             return refs;
         }

@@ -94,7 +94,7 @@ namespace IslandAssault
             ClearWorld();
             phase = Phase.Scout;
             GenerateEnemy();
-            CameraController.I.Focus(new Vector3(0, 0, -4f), 66f);
+            CameraController.I.Focus(new Vector3(0, 0, -4f), 58f);
             CameraController.I.InputEnabled = true;
             BuildUI();
         }

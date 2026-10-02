@@ -102,7 +102,7 @@ namespace IslandAssault
             int res = 84;
             float size = Extent * 2f;
             float step = size / res;
-            var mb = new MeshBuilder(3, MeshBuilder.Orient.Up);
+            var mb = new MeshBuilder(6, MeshBuilder.Orient.Up);
             var h = new float[res + 1, res + 1];
             var pts = new Vector3[res + 1, res + 1];
             for (int i = 0; i <= res; i++)
@@ -135,46 +135,62 @@ namespace IslandAssault
             go.transform.SetParent(transform, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             var r = go.AddComponent<MeshRenderer>();
+            float e = enemy ? 0.93f : 1f;
             r.sharedMaterials = new Material[]
             {
-                Art.Mat(Art.Sand, 0.05f),
-                Art.Mat(enemy ? new Color(0.38f, 0.66f, 0.27f) : Art.Grass, 0.05f),
-                Art.Mat(new Color(0.84f, 0.74f, 0.52f), 0.05f)
+                Art.Mat(new Color(0.98f, 0.88f, 0.64f), 0.05f),                 // 0 dry sand
+                Art.Mat(new Color(0.50f * e, 0.74f, 0.34f), 0.05f),             // 1 grass
+                Art.Mat(new Color(0.80f, 0.72f, 0.48f), 0.05f),                 // 2 grass edge
+                Art.Mat(new Color(0.45f * e, 0.69f, 0.31f), 0.05f),             // 3 grass darker
+                Art.Mat(new Color(0.55f * e, 0.77f, 0.37f), 0.05f),             // 4 grass lighter
+                Art.Mat(new Color(0.86f, 0.80f, 0.58f), 0.1f)                   // 5 wet sand / seabed
             };
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.receiveShadows = true;
             meshCollider = go.AddComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
 
-            // Grid plate: a subtle checker so the buildable area reads clearly
-            var plate = new GameObject("GridPlate");
+            // Grid overlay: only shown while placing or moving a building
+            var plate = new GameObject("GridOverlay");
             plate.transform.SetParent(transform, false);
             var pmb = new MeshBuilder(2, MeshBuilder.Orient.Up);
             float half = GameData.GridSize * 0.5f * GameData.CellSize;
-            for (int gx = 0; gx < GameData.GridSize; gx += 2)
-                for (int gy = 0; gy < GameData.GridSize; gy += 2)
+            for (int gx = 0; gx < GameData.GridSize; gx++)
+                for (int gy = 0; gy < GameData.GridSize; gy++)
                 {
-                    float x0 = -half + gx * GameData.CellSize, z0 = -half + gy * GameData.CellSize;
-                    float x1 = x0 + GameData.CellSize * 2f, z1 = z0 + GameData.CellSize * 2f;
-                    float y = PlateauHeight + 0.025f;
-                    pmb.Quad(new Vector3(x0, y, z0), new Vector3(x0, y, z1), new Vector3(x1, y, z1), new Vector3(x1, y, z0), ((gx + gy) / 2) % 2);
+                    float x0 = -half + gx * GameData.CellSize + 0.06f, z0 = -half + gy * GameData.CellSize + 0.06f;
+                    float x1 = x0 + GameData.CellSize - 0.12f, z1 = z0 + GameData.CellSize - 0.12f;
+                    float y = PlateauHeight + 0.03f;
+                    pmb.Quad(new Vector3(x0, y, z0), new Vector3(x0, y, z1), new Vector3(x1, y, z1), new Vector3(x1, y, z0), (gx + gy) % 2);
                 }
-            plate.AddComponent<MeshFilter>().sharedMesh = pmb.Build("GridPlate");
+            plate.AddComponent<MeshFilter>().sharedMesh = pmb.Build("GridOverlay");
             var pr = plate.AddComponent<MeshRenderer>();
-            Color g1 = enemy ? new Color(0.40f, 0.68f, 0.28f) : new Color(0.45f, 0.76f, 0.32f);
-            Color g2 = enemy ? new Color(0.37f, 0.64f, 0.26f) : new Color(0.41f, 0.72f, 0.29f);
-            pr.sharedMaterials = new Material[] { Art.Mat(g1, 0.05f), Art.Mat(g2, 0.05f) };
+            pr.sharedMaterials = new Material[] { Art.Transparent(new Color(1f, 1f, 1f, 0.16f), 0f), Art.Transparent(new Color(1f, 1f, 1f, 0.09f), 0f) };
             pr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            gridOverlay = plate;
+            plate.SetActive(false);
         }
+
+        public GameObject gridOverlay;
+        public void ShowGrid(bool show) { if (gridOverlay != null) gridOverlay.SetActive(show); }
 
         void AddTri(MeshBuilder mb, Vector3 a, Vector3 b, Vector3 c)
         {
             float avg = (a.y + b.y + c.y) / 3f;
             float maxY = Mathf.Max(a.y, Mathf.Max(b.y, c.y));
             int sub;
-            if (avg > 0.62f) sub = 1;           // grass
-            else if (maxY > 0.5f) sub = 2;      // grass/sand transition (darker sand)
-            else sub = 0;                       // beach + seabed
+            if (avg > 0.62f)
+            {
+                // patchy low-poly grass: big soft patches + a little per-triangle variation
+                Vector3 m = (a + b + c) / 3f;
+                float patch = Mathf.PerlinNoise(m.x * 0.09f + noiseOffset, m.z * 0.09f - noiseOffset);
+                float jitter = (Mathf.Sin(m.x * 12.9898f + m.z * 78.233f) * 43758.5453f) % 1f;
+                float v = patch + Mathf.Abs(jitter) * 0.25f;
+                sub = v < 0.45f ? 3 : (v < 0.78f ? 1 : 4);
+            }
+            else if (maxY > 0.5f) sub = 2;      // grass/sand transition
+            else if (avg < 0.02f) sub = 5;      // wet sand + seabed (looks turquoise under the water)
+            else sub = 0;                       // dry beach
             mb.Tri(a, b, c, sub);
         }
 

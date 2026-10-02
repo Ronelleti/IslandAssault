@@ -31,25 +31,25 @@ namespace IslandAssault
                 sun = lg.AddComponent<Light>();
                 sun.type = LightType.Directional;
             }
-            sun.transform.rotation = Quaternion.Euler(48f, -35f, 0f);
+            sun.transform.rotation = Quaternion.Euler(42f, -40f, 0f);
             sun.color = new Color(1f, 0.95f, 0.86f);
-            sun.intensity = 1.25f;
+            sun.intensity = 1.45f;
             sun.shadows = LightShadows.Soft;
-            sun.shadowStrength = 0.75f;
+            sun.shadowStrength = 0.82f;
             sun.shadowBias = 0.04f;
             sun.shadowNormalBias = 0.3f;
             RenderSettings.sun = sun;
 
             // --- Ambient & fog ---
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.62f, 0.74f, 0.90f);
-            RenderSettings.ambientEquatorColor = new Color(0.58f, 0.66f, 0.66f);
+            RenderSettings.ambientSkyColor = new Color(0.70f, 0.80f, 0.95f);
+            RenderSettings.ambientEquatorColor = new Color(0.62f, 0.70f, 0.70f);
             RenderSettings.ambientGroundColor = new Color(0.36f, 0.34f, 0.28f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = new Color(0.66f, 0.84f, 0.95f);
-            RenderSettings.fogStartDistance = 110f;
-            RenderSettings.fogEndDistance = 260f;
+            RenderSettings.fogStartDistance = 140f;
+            RenderSettings.fogEndDistance = 320f;
             QualitySettings.shadowDistance = 150f;
 
             // --- Ocean ---
@@ -58,7 +58,7 @@ namespace IslandAssault
             water.AddComponent<Water>();
 
             // --- Sea floor (seen through the transparent water) ---
-            var floor = Art.MeshPart(transform, Art.Cube, new Vector3(0, -3.4f, 0), new Vector3(600f, 0.2f, 600f), Art.Mat(new Color(0.55f, 0.66f, 0.55f), 0f), default(Vector3), false);
+            var floor = Art.MeshPart(transform, Art.Cube, new Vector3(0, -3.4f, 0), new Vector3(600f, 0.2f, 600f), Art.Mat(new Color(0.05f, 0.30f, 0.45f), 0f), default(Vector3), false);
             floor.name = "SeaFloor";
 
             // --- Clouds ---
@@ -122,7 +122,7 @@ namespace IslandAssault
             verts = new Vector3[basePos.Length];
             gameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
             var r = gameObject.AddComponent<MeshRenderer>();
-            r.sharedMaterial = Art.Transparent(new Color(0.12f, 0.62f, 0.78f, 0.72f), 0.85f);
+            r.sharedMaterial = Art.Transparent(new Color(0.10f, 0.66f, 0.82f, 0.60f), 0.92f);
             r.shadowCastingMode = ShadowCastingMode.Off;
             r.receiveShadows = true;
         }
