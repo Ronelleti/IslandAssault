@@ -61,7 +61,8 @@ namespace IslandAssault
             inst.name = prefab.name;
             var t = inst.transform;
             t.localPosition = Vector3.zero;
-            t.localRotation = Quaternion.identity;
+            // keep only the prefab's own Y rotation, so you can turn a model by setting Rotation Y on the prefab
+            t.localRotation = Quaternion.Euler(0f, prefab.transform.localRotation.eulerAngles.y, 0f);
             t.localScale = Vector3.one;
 
             foreach (var c in inst.GetComponentsInChildren<Collider>()) Object.Destroy(c);
